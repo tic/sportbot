@@ -1,0 +1,46 @@
+{
+  "name": "sportbot",
+  "version": "1.0.0",
+  "description": "Tracks select sporting events and posts about them in Discord",
+  "main": "index.ts",
+  "scripts": {
+    "start-dev": "nodemon index.ts",
+    "start": "ts-node index",
+    "lint": "eslint --ext .ts ./"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tic/sportbot.git"
+  },
+  "author": "G. Michael Fitzgerald",
+  "license": "MIT",
+  "dependencies": {
+    "@types/jsdom": "^16.2.14",
+    "axios": "^0.27.2",
+    "discord.js": "^13.8.1",
+    "dotenv": "^16.0.1",
+    "jsdom": "^20.0.0",
+    "mongodb": "^4.8.0",
+    "ts-node": "^10.8.2",
+    "typescript": "^4.7.4"
+  },
+  "devDependencies": {
+    "@types/luxon": "^2.3.2",
+    "@typescript-eslint/eslint-plugin": "^5.33.0",
+    "@typescript-eslint/parser": "^5.33.0",
+    "eslint": "^8.21.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.4",
+    "eslint-plugin-promise": "^6.0.0",
+    "nodemon": "^2.0.12"
+  },
+  "engines": {
+    "node": ">=16.6.0"
+  },
+  "bugs": {
+    "url": "https://github.com/tic/sportbot/issues"
+  },
+  "homepage": "https://github.com/tic/sportbot#readme"
+}
