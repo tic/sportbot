@@ -50,3 +50,5 @@ export const sleep = (ms: number) => new Promise((_resolve) => {
   const resolve = _resolve as () => void;
   setTimeout(() => resolve(), ms);
 });
+
+export const msUntilHourUTC = (hour: number) => 86400000 - ((new Date().getTime() - hour * 3600000) % 86400000);

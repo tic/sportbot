@@ -14,6 +14,7 @@ export type EventType = {
   endDate?: number,
   imageUrl?: string,
   location?: string,
+  url?: string,
 };
 
 // collect: goes out to the internet and gets event items for the given sport
@@ -24,11 +25,11 @@ export type EventType = {
 //            exist. ex: formula 1 posts on wednesday a bulk item which shows
 //            the entire schedule for an upcoming race weekend, but also does
 //            individual items on the actual day of the event, e.g. qualifier
-export type SportCollectorType = {
+export type EventControllerType = {
   collect: () => Promise<EventType[]>,
   mergeToDb: (_: EventType[]) => Promise<boolean>,
   announcer: () => Promise<{
     events: EventType[],
-    dedicatedEmbed: MessageEmbed,
+    dedicatedEmbed?: MessageEmbed,
   }>,
 };
