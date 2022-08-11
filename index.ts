@@ -45,10 +45,12 @@ const runAnnouncers = async () => {
     ]);
     const embedFields: EmbedFieldData[] = [];
     announcementObjects.forEach((announcement) => {
-      embedFields.concat(announcement.events.map((event) => ({
-        name: event.title,
-        value: eventToEmbedDataValue(event),
-      })));
+      announcement.events.forEach((event) => {
+        embedFields.push({
+          name: event.title,
+          value: eventToEmbedDataValue(event),
+        });
+      });
 
       if (announcement.dedicatedEmbed) {
         announce(ChannelClassEnum.GENERAL_UPDATES, undefined, announcement.dedicatedEmbed, []);
@@ -67,6 +69,10 @@ const runAnnouncers = async () => {
     logError(LogCategoriesEnum.ANNOUNCE_FAILURE, 'index_runAnnouncers', String(error));
   }
 };
+
+if (config.meta.inDevelopment) {
+  setTimeout(runAnnouncers, 3000);
+}
 
 setTimeout(() => {
   runAnnouncers();

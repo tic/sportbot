@@ -3,6 +3,7 @@ import axios from 'axios';
 import { EmbedFieldData, MessageEmbed } from 'discord.js';
 import { JSDOM } from 'jsdom';
 import { config } from '../config';
+import { fullDays } from '../services/constants.service';
 import { collections } from '../services/database.service';
 import { logError, logMessage } from '../services/logger.service';
 import { Formula1EventType, Formula1WeekendType } from '../types/eventFormula1Types';
@@ -98,7 +99,7 @@ const announcer = async () => {
 
     // On Wednesday, we check if the upcoming weekend is a race weekend
     let dedicatedEmbed: MessageEmbed | undefined;
-    if (new Date().getDay() === 3) {
+    if (config.meta.inDevelopment || new Date().getDay() === 3) {
       const [headerItem, ...weekendItems] = (await collections.formula1.find({
         startDate: {
           $gt: now,
@@ -107,7 +108,7 @@ const announcer = async () => {
       }).toArray() as unknown as EventType[]); // .filter((event) => event.endDate - event.startDate < 86400000);
       if (headerItem && weekendItems.length > 0) {
         const embedFields: EmbedFieldData[] = weekendItems.map((item) => ({
-          name: item.title.split(' - ')[0],
+          name: `${item.title.split(' - ')[0]} (${fullDays[new Date(item.startDate).getDay()]})`,
           value: `Start time: <t:${item.startDate / 1000}:t> (<t:${item.startDate / 1000}:R>)`,
         }));
         dedicatedEmbed = new MessageEmbed()
@@ -122,6 +123,10 @@ const announcer = async () => {
           .addFields(embedFields);
       }
     }
+    logMessage(
+      config.sports.formula1.identifier,
+      `emitting ${todaysEvents.length + (dedicatedEmbed ? 1 : 0)} announcement item(s)`,
+    );
     return {
       events: todaysEvents,
       dedicatedEmbed,

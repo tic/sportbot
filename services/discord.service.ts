@@ -15,6 +15,8 @@ import { config } from '../config';
 import { logMessage } from './logger.service';
 import { ChannelClassEnum } from '../types/serviceDiscordTypes';
 
+const throttleSleepTimeMs = config.meta.inDevelopment ? 5000 : 60000;
+
 const options: ClientOptions = {
   intents: new Intents()
     .add(Intents.FLAGS.DIRECT_MESSAGES)
@@ -29,7 +31,10 @@ const queueLock = new Semaphore(1);
 const throttleMessages = async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
+    let didSomething = false;
     while (messageQueue.length > 0) {
+      didSomething = true;
+      logMessage(config.discord.identifier, 'draining message queue');
       // eslint-disable-next-line no-await-in-loop
       const release = await queueLock.acquire();
       const messagePayload = messageQueue.shift() as MessagePayload;
@@ -38,8 +43,11 @@ const throttleMessages = async () => {
       // eslint-disable-next-line no-await-in-loop
       await sleep(3000);
     }
+    if (didSomething) {
+      logMessage(config.discord.identifier, 'message queue emptied');
+    }
     // eslint-disable-next-line no-await-in-loop
-    await sleep(60000);
+    await sleep(throttleSleepTimeMs);
   }
 };
 

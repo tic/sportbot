@@ -57,14 +57,18 @@ export const getConfig = () => {
         url: env('SPORT_NCAA_BASEBALL_URL'),
       },
     },
+    meta: {
+      inDevelopment: parsedEnv?.MODE !== 'PRODUCTION',
+    },
     discord: {
       secret: env('DISCORD_SECRET'),
       username: env('DISCORD_USERNAME'),
       servers: (
-        parsedEnv?.MODE === 'PRODUCTION'
-          ? prodDiscordServerConfig
-          : devDiscordServerConfig
+        parsedEnv?.MODE !== 'PRODUCTION'
+          ? devDiscordServerConfig
+          : prodDiscordServerConfig
         ) as unknown as DiscordServerType[],
+      identifier: 'service_discord',
     },
     mongo: {
       url: env('MONGO_URL'),
