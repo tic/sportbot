@@ -2,6 +2,7 @@
 /* eslint-disable no-shadow */
 export enum ChannelClassEnum {
   GENERAL_UPDATES = 'GENERAL_UPDATES',
+  HOLIDAY = 'HOLIDAY',
 };
 
 export type DiscordRoleType = {

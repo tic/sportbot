@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 export const fullDays = [
   'Sunday',
   'Monday',
@@ -7,4 +6,19 @@ export const fullDays = [
   'Thursday',
   'Friday',
   'Saturday',
+];
+
+export const fullMonths = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];

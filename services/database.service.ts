@@ -23,4 +23,5 @@ export const collections = {
   nhl: client.db(config.mongo.primaryDatabase).collection('nhl'),
   ncaaBasketball: client.db(config.mongo.primaryDatabase).collection('ncaaBasketball'),
   ncaaBaseball: client.db(config.mongo.primaryDatabase).collection('ncaaBaseball'),
+  holiday: client.db(config.mongo.primaryDatabase).collection('holiday'),
 };

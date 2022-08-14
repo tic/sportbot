@@ -25,8 +25,8 @@ const getJSONDataFromDom = (dom: JSDOM) => Array.from(
 
 const collect = async () => {
   try {
-    logMessage(config.sports.formula1.identifier, 'collecting data...');
-    const urlWithCurrentYear = config.sports.formula1.url.replace('<$YEAR>', new Date().getFullYear().toString());
+    logMessage(config.source.formula1.identifier, 'collecting data...');
+    const urlWithCurrentYear = config.source.formula1.url.replace('<$YEAR>', new Date().getFullYear().toString());
     const { data: parsedResult } = await axios.get(urlWithCurrentYear);
     const data = getJSONDataFromDom(new JSDOM(parsedResult)) as Formula1EventType[];
     const events = await Promise.all(data.map(async (eventBlock) => {
@@ -61,10 +61,10 @@ const collect = async () => {
         url: eventBlock['@id'],
       }, ...subEvents];
     }));
-    logMessage(config.sports.formula1.identifier, 'collecting done!');
+    logMessage(config.source.formula1.identifier, 'collecting done!');
     return events.flat(1);
   } catch (error) {
-    logError(LogCategoriesEnum.SCRAPE_FAILURE, config.sports.formula1.identifier, String(error));
+    logError(LogCategoriesEnum.SCRAPE_FAILURE, config.source.formula1.identifier, String(error));
     return [];
   }
 };
@@ -78,10 +78,10 @@ const mergeToDb = async (events: EventType[]) => {
         upsert: true,
       },
     })));
-    logMessage(config.sports.formula1.identifier, 'merge complete');
+    logMessage(config.source.formula1.identifier, 'merge complete');
     return result.isOk();
   } catch (error) {
-    logError(LogCategoriesEnum.DB_MERGE_FAILURE, config.sports.formula1.identifier, String(error));
+    logError(LogCategoriesEnum.DB_MERGE_FAILURE, config.source.formula1.identifier, String(error));
     return false;
   }
 };
@@ -124,7 +124,7 @@ const announcer = async () => {
       }
     }
     logMessage(
-      config.sports.formula1.identifier,
+      config.source.formula1.identifier,
       `emitting ${todaysEvents.length + (dedicatedEmbed ? 1 : 0)} announcement item(s)`,
     );
     return {
@@ -132,7 +132,7 @@ const announcer = async () => {
       dedicatedEmbed,
     };
   } catch (error) {
-    logError(LogCategoriesEnum.ANNOUNCE_FAILURE, config.sports.formula1.identifier, String(error));
+    logError(LogCategoriesEnum.ANNOUNCE_FAILURE, config.source.formula1.identifier, String(error));
     return {
       events: [],
     };

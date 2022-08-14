@@ -12,8 +12,9 @@ import {
   sleep,
 } from './util.service';
 import { config } from '../config';
-import { logMessage } from './logger.service';
+import { logError, logMessage } from './logger.service';
 import { ChannelClassEnum } from '../types/serviceDiscordTypes';
+import { LogCategoriesEnum } from '../types/serviceLoggerTypes';
 
 const throttleSleepTimeMs = config.meta.inDevelopment ? 5000 : 60000;
 
@@ -54,9 +55,12 @@ const throttleMessages = async () => {
 export const initialize = () => new Promise((resolve) => {
   client.login(config.discord.secret);
   client.on('ready', () => {
-    logMessage('service.discord.initialize', `${config.discord.username} has logged in.`);
+    logMessage(config.discord.identifier, `${config.discord.username} has logged in.`);
     resolve(true);
     throttleMessages();
+  });
+  client.on('error', (error) => {
+    logError(LogCategoriesEnum.ANNOUNCE_FAILURE, config.discord.identifier, String(error));
   });
 });
 

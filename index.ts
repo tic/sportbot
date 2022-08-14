@@ -13,21 +13,22 @@ initialize();
 setIntervalAndStart(async () => {
   const collectionResult = await formula1.collect();
   formula1.mergeToDb(collectionResult);
-}, config.sports.formula1.intervalMs);
+}, config.source.formula1.intervalMs);
 
 const eventToEmbedDataValue = (event: EventType) => {
-  const baseString = `Description: ${
-    event.description
-  }\nStart Date: <t:${
-    event.startDate / 1000
-  }:t> (<t:${
-    event.startDate / 1000
-  }:R>)`;
-
+  const baseString = `${event.description}\n`;
   const additionalFields = [];
+
+  if (!event.allDay) {
+    additionalFields.push(`Starts: <t:${
+      event.startDate / 1000
+    }:t> (<t:${
+      event.startDate / 1000
+    }:R>)`);
+  }
   if (event.endDate) {
     additionalFields.push(
-      `End Date: <t:${Math.floor(event.endDate / 1000)}:t> (<t:${Math.floor(event.endDate / 1000)}:R>)`,
+      `Ends: <t:${Math.floor(event.endDate / 1000)}:t> (<t:${Math.floor(event.endDate / 1000)}:R>)`,
     );
   }
   if (event.location) {

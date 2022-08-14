@@ -41,9 +41,9 @@ const eventController = require(`${baseLocation}/${eventControllerFile}`).defaul
   }
 
   if (argv[3] === 'announce') {
+    await initialize();
     const announcerResults = await eventController.announcer();
     if (announcerResults.dedicatedEmbed) {
-      await initialize();
       await announce(ChannelClassEnum.GENERAL_UPDATES, undefined, announcerResults.dedicatedEmbed, []);
     }
   }

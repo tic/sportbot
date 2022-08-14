@@ -15,6 +15,7 @@ export type EventType = {
   imageUrl?: string,
   location?: string,
   url?: string,
+  allDay?: boolean,
 };
 
 // collect: goes out to the internet and gets event items for the given sport

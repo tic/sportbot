@@ -52,3 +52,13 @@ export const sleep = (ms: number) => new Promise((_resolve) => {
 });
 
 export const msUntilHourUTC = (hour: number) => 86400000 - ((new Date().getTime() - hour * 3600000) % 86400000);
+
+export const padNumberToTwoDigits = (num: number) => (num < 10 ? `0${num}` : num.toString());
+
+export const padNumberToNDigits = (num: number, size: number) => {
+  const baseString = num.toString();
+  const padSize = size - baseString.length;
+  return padSize < 1
+    ? baseString
+    : `${[...new Array(padSize)].map(() => '0').join('')}${baseString}`;
+};

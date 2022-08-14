@@ -25,36 +25,41 @@ export const getConfig = () => {
   }
 
   const createdConfig = {
-    sports: {
+    source: {
       formula1: {
-        intervalMs: parseInt(env('SPORT_FORMULA1_INTERVALMS'), 10),
-        identifier: 'sport_formula1',
-        url: env('SPORT_FORMULA1_URL'),
+        intervalMs: parseInt(env('SOURCE_FORMULA1_INTERVALMS'), 10),
+        identifier: 'source_formula1',
+        url: env('SOURCE_FORMULA1_URL'),
       },
       nfl: {
-        intervalMs: parseInt(env('SPORT_NFL_INTERVALMS'), 10),
-        identifier: 'sport_nfl',
-        url: env('SPORT_NFL_URL'),
+        intervalMs: parseInt(env('SOURCE_NFL_INTERVALMS'), 10),
+        identifier: 'source_nfl',
+        url: env('SOURCE_NFL_URL'),
       },
       mlb: {
-        intervalMs: parseInt(env('SPORT_MLB_INTERVALMS'), 10),
+        intervalMs: parseInt(env('SOURCE_MLB_INTERVALMS'), 10),
         identifier: 'spot_mlb',
-        url: env('SPORT_MLB_URL'),
+        url: env('SOURCE_MLB_URL'),
       },
       nhl: {
-        intervalMs: parseInt(env('SPORT_NHL_INTERVALMS'), 10),
-        identifier: 'sport_nhl',
-        url: env('SPORT_NHL_URL'),
+        intervalMs: parseInt(env('SOURCE_NHL_INTERVALMS'), 10),
+        identifier: 'source_nhl',
+        url: env('SOURCE_NHL_URL'),
       },
       ncaaBasketball: {
-        intervalMs: parseInt(env('SPORT_NCAA_BASKETBALL_INTERVALMS'), 10),
-        identifier: 'sport_ncaaBasketball',
-        url: env('SPORT_NCAA_BASKETBALL_URL'),
+        intervalMs: parseInt(env('SOURCE_NCAA_BASKETBALL_INTERVALMS'), 10),
+        identifier: 'source_ncaaBasketball',
+        url: env('SOURCE_NCAA_BASKETBALL_URL'),
       },
       ncaaBaseball: {
-        intervalMs: parseInt(env('SPORT_NCAA_BASEBALL_INTERVALMS'), 10),
-        identifier: 'sport_ncaaBaseball',
-        url: env('SPORT_NCAA_BASEBALL_URL'),
+        intervalMs: parseInt(env('SOURCE_NCAA_BASEBALL_INTERVALMS'), 10),
+        identifier: 'source_ncaaBaseball',
+        url: env('SOURCE_NCAA_BASEBALL_URL'),
+      },
+      holiday: {
+        intervalMs: parseInt(env('SOURCE_HOLIDAY_INTERVALMS'), 10),
+        identifier: 'source_holiday',
+        url: env('SOURCE_HOLIDAY_URL'),
       },
     },
     meta: {
