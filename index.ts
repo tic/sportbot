@@ -4,16 +4,30 @@ import { announce, initialize } from './services/discord.service';
 import { logError, logMessage } from './services/logger.service';
 import { msUntilHourUTC, setIntervalAndStart } from './services/util.service';
 import formula1 from './sources/formula1';
+import holidays from './sources/holidays';
 import { EventType } from './types/globalTypes';
 import { ChannelClassEnum } from './types/serviceDiscordTypes';
 import { LogCategoriesEnum } from './types/serviceLoggerTypes';
 
 initialize();
 
-setIntervalAndStart(async () => {
-  const collectionResult = await formula1.collect();
-  formula1.mergeToDb(collectionResult);
-}, config.source.formula1.intervalMs);
+const modules = [
+  {
+    controller: formula1,
+    config: config.source.formula1,
+  },
+  {
+    controller: holidays,
+    config: config.source.holiday,
+  },
+];
+
+modules.forEach((module) => {
+  setIntervalAndStart(async () => {
+    const collectionResult = await module.controller.collect();
+    module.controller.mergeToDb(collectionResult);
+  }, module.config.intervalMs);
+});
 
 const eventToEmbedDataValue = (event: EventType) => {
   const baseString = `${event.description}\n`;
@@ -41,9 +55,9 @@ const eventToEmbedDataValue = (event: EventType) => {
 const runAnnouncers = async () => {
   try {
     logMessage('index_runAnnouncers', 'Running announcers');
-    const announcementObjects = await Promise.all([
-      formula1.announcer(),
-    ]);
+    const announcementObjects = await Promise.all(
+      modules.map((module) => module.controller.announcer()),
+    );
     const embedFields: EmbedFieldData[] = [];
     announcementObjects.forEach((announcement) => {
       announcement.events.forEach((event) => {
