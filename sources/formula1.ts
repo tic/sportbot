@@ -1,4 +1,3 @@
-/* eslint-disable arrow-body-style */
 import axios from 'axios';
 import { EmbedFieldData, MessageEmbed } from 'discord.js';
 import { JSDOM } from 'jsdom';
@@ -6,6 +5,7 @@ import { config } from '../config';
 import { fullDays } from '../services/constants.service';
 import { collections } from '../services/database.service';
 import { logError } from '../services/logger.service';
+import { dateObjectToMMDDYYYY } from '../services/util.service';
 import { Formula1EventType, Formula1WeekendType } from '../types/eventFormula1Types';
 import { EventControllerType, EventType } from '../types/globalTypes';
 import { LogCategoriesEnum } from '../types/serviceLoggerTypes';
@@ -40,7 +40,7 @@ const collect = async () => {
         return {
           title: event.name,
           description: eventBlock.description,
-          startDay: `${date.getUTCMonth() + 1}-${date.getUTCDate()}-${date.getUTCFullYear()}`,
+          startDay: dateObjectToMMDDYYYY(date),
           startDate: new Date(event.startDate).getTime(),
           endDate: new Date(event.endDate).getTime(),
           imageUrl: event.image.url,
@@ -52,7 +52,7 @@ const collect = async () => {
       return [{
         title: eventBlock.name,
         description: eventBlock.description,
-        startDay: `${blockDate.getUTCMonth() + 1}-${blockDate.getUTCDate()}-${blockDate.getUTCFullYear()}`,
+        startDay: dateObjectToMMDDYYYY(blockDate),
         startDate: new Date(eventBlock.startDate).getTime(),
         endDate: new Date(eventBlock.endDate).getTime(),
         imageUrl: eventBlock.image.url,
@@ -96,13 +96,13 @@ const announcer = async () => {
 
     // On Wednesday, we check if the upcoming weekend is a race weekend
     let dedicatedEmbed: MessageEmbed | undefined;
-    if (config.meta.inDevelopment || new Date().getDay() === 3) {
+    if ((config.meta.inDevelopment && !config.meta.inPracticeMode) || new Date().getDay() === 3) {
       const [headerItem, ...weekendItems] = (await collections.formula1.find({
         startDate: {
           $gt: now,
           $lt: now + 518400000,
         },
-      }).toArray() as unknown as EventType[]); // .filter((event) => event.endDate - event.startDate < 86400000);
+      }).toArray() as unknown as EventType[]);
       if (headerItem && weekendItems.length > 0) {
         const embedFields: EmbedFieldData[] = weekendItems.map((item) => ({
           name: `${item.title.split(' - ')[0]} (${fullDays[new Date(item.startDate).getDay()]})`,

@@ -75,6 +75,7 @@ export const getConfig = () => {
     },
     meta: {
       inDevelopment,
+      inPracticeMode: env('PRACTICE_MODE') === 'true',
     },
     discord: {
       secret: env('DISCORD_SECRET'),

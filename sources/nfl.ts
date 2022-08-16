@@ -3,7 +3,7 @@ import { JSDOM } from 'jsdom';
 import { config } from '../config';
 import { collections } from '../services/database.service';
 import { logError } from '../services/logger.service';
-import { padNumberToTwoDigits } from '../services/util.service';
+import { dateObjectToMMDDYYYY } from '../services/util.service';
 import { EventControllerType, EventType } from '../types/globalTypes';
 import { LogCategoriesEnum } from '../types/serviceLoggerTypes';
 
@@ -55,13 +55,7 @@ const collect = async () => {
         return {
           title: `${team1} @ ${team2}`,
           description: `Watch on ${broadcaster}`,
-          startDay: `${
-            padNumberToTwoDigits(baseDate.getMonth() + 1)
-          }-${
-            padNumberToTwoDigits(baseDate.getDate())
-          }-${
-            baseDate.getFullYear()
-          }`,
+          startDay: dateObjectToMMDDYYYY(baseDate),
           startDate: baseDate.getTime(),
           location: dataBits[5].textContent || '',
         } as EventType;
@@ -93,14 +87,7 @@ const mergeToDb = async (events: EventType[]) => {
 
 const announcer = async () => {
   try {
-    const now = new Date();
-    const startDay = `${
-      padNumberToTwoDigits(now.getMonth() + 1)
-    }-${
-      padNumberToTwoDigits(now.getDate())
-    }-${
-      now.getFullYear()
-    }`;
+    const startDay = dateObjectToMMDDYYYY(new Date());
     const events = (await collections.nfl.find({
       startDay,
       $or: config.source.nfl.followedTeams.map((team) => ({ title: { $regex: team, $options: 'i' } })),
