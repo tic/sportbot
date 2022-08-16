@@ -24,6 +24,8 @@ export const getConfig = () => {
     return value;
   }
 
+  const inDevelopment = parsedEnv?.MODE !== 'PRODUCTION';
+
   const createdConfig = {
     source: {
       formula1: {
@@ -35,6 +37,12 @@ export const getConfig = () => {
         intervalMs: parseInt(env('SOURCE_NFL_INTERVALMS'), 10),
         identifier: 'source_nfl',
         url: env('SOURCE_NFL_URL'),
+        followedTeams: inDevelopment ? ['TEST'] : [
+          'DAL',
+          'PHI',
+          'NYG',
+          'WAS',
+        ],
       },
       mlb: {
         intervalMs: parseInt(env('SOURCE_MLB_INTERVALMS'), 10),
@@ -63,13 +71,13 @@ export const getConfig = () => {
       },
     },
     meta: {
-      inDevelopment: parsedEnv?.MODE !== 'PRODUCTION',
+      inDevelopment,
     },
     discord: {
       secret: env('DISCORD_SECRET'),
       username: env('DISCORD_USERNAME'),
       servers: (
-        parsedEnv?.MODE !== 'PRODUCTION'
+        inDevelopment
           ? devDiscordServerConfig
           : prodDiscordServerConfig
         ) as unknown as DiscordServerType[],

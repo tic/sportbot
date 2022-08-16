@@ -2,10 +2,9 @@ import { EmbedFieldData, MessageEmbed } from 'discord.js';
 import { config } from './config';
 import { announce, initialize } from './services/discord.service';
 import { logError, logMessage } from './services/logger.service';
-import { msUntilHourUTC, setIntervalAndStart } from './services/util.service';
+import { eventToEmbedDataValue, msUntilHourUTC, setIntervalAndStart } from './services/util.service';
 import formula1 from './sources/formula1';
 import holidays from './sources/holidays';
-import { EventType } from './types/globalTypes';
 import { ChannelClassEnum } from './types/serviceDiscordTypes';
 import { LogCategoriesEnum } from './types/serviceLoggerTypes';
 
@@ -35,29 +34,6 @@ modules.forEach((module) => {
   }, module.config.intervalMs);
 });
 
-const eventToEmbedDataValue = (event: EventType) => {
-  const baseString = `${event.description}\n`;
-  const additionalFields = [];
-
-  if (!event.allDay) {
-    additionalFields.push(`Starts: <t:${
-      event.startDate / 1000
-    }:t> (<t:${
-      event.startDate / 1000
-    }:R>)`);
-  }
-  if (event.endDate) {
-    additionalFields.push(
-      `Ends: <t:${Math.floor(event.endDate / 1000)}:t> (<t:${Math.floor(event.endDate / 1000)}:R>)`,
-    );
-  }
-  if (event.location) {
-    additionalFields.push(`Location: ${event.location}`);
-  }
-
-  return additionalFields.length === 0 ? baseString : `${baseString}\n${additionalFields.join('\n')}`;
-};
-
 const runAnnouncers = async () => {
   try {
     logMessage('index_runAnnouncers', 'Running announcers');
@@ -65,7 +41,10 @@ const runAnnouncers = async () => {
       modules.map(async (module) => {
         await logMessage(module.config.identifier, 'announcer invoked');
         const announcementObj = await module.controller.announcer();
-        logMessage(module.config.identifier, 'announcer complete');
+        logMessage(
+          module.config.identifier,
+          `emitting ${announcementObj.events.length + (announcementObj.dedicatedEmbed ? 1 : 0)} announcement item(s)`,
+        );
         return announcementObj;
       }),
     );

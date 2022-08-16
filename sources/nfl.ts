@@ -49,9 +49,12 @@ const collect = async () => {
           }
         }
 
+        const team1 = (dataBits[0].innerHTML.match(/\/name\/([a-zA-Z]{2}[a-zA-Z]?)\//)?.[1] || '').toUpperCase();
+        const team2 = (dataBits[1].innerHTML.match(/\/name\/([a-zA-Z]{2}[a-zA-Z]?)\//)?.[1] || '').toUpperCase();
+
         return {
-          title: `${dataBits[0].textContent}${dataBits[1].textContent}`,
-          description: broadcaster,
+          title: `${team1} @ ${team2}`,
+          description: `Watch on ${broadcaster}`,
           startDay: `${
             padNumberToTwoDigits(baseDate.getMonth() + 1)
           }-${
@@ -100,7 +103,12 @@ const announcer = async () => {
     }`;
     const events = (await collections.nfl.find({
       startDay,
+      $or: config.source.nfl.followedTeams.map((team) => ({ title: { $regex: team, $options: 'i' } })),
     }).toArray()) as unknown as EventType[];
+    events.forEach((event) => {
+      // eslint-disable-next-line no-param-reassign
+      event.title = `(NFL) ${event.title}`;
+    });
     return {
       events,
     };

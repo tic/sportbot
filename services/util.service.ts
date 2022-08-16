@@ -1,3 +1,5 @@
+import { EventType } from '../types/globalTypes';
+
 export const setIntervalAndStart = (fn: () => void, intervalMs: number) => {
   if (intervalMs > 20000) {
     setTimeout(fn, 5000);
@@ -61,4 +63,27 @@ export const padNumberToNDigits = (num: number, size: number) => {
   return padSize < 1
     ? baseString
     : `${[...new Array(padSize)].map(() => '0').join('')}${baseString}`;
+};
+
+export const eventToEmbedDataValue = (event: EventType) => {
+  const baseString = `${event.description}`;
+  const additionalFields = [];
+
+  if (!event.allDay) {
+    additionalFields.push(`Starts: <t:${
+      event.startDate / 1000
+    }:t> (<t:${
+      event.startDate / 1000
+    }:R>)`);
+  }
+  if (event.endDate) {
+    additionalFields.push(
+      `Ends: <t:${Math.floor(event.endDate / 1000)}:t> (<t:${Math.floor(event.endDate / 1000)}:R>)`,
+    );
+  }
+  if (event.location) {
+    additionalFields.push(`Location: ${event.location}`);
+  }
+
+  return additionalFields.length === 0 ? baseString : `${baseString}\n${additionalFields.join('\n')}`;
 };

@@ -5,7 +5,7 @@ import { JSDOM } from 'jsdom';
 import { config } from '../config';
 import { fullDays } from '../services/constants.service';
 import { collections } from '../services/database.service';
-import { logError, logMessage } from '../services/logger.service';
+import { logError } from '../services/logger.service';
 import { Formula1EventType, Formula1WeekendType } from '../types/eventFormula1Types';
 import { EventControllerType, EventType } from '../types/globalTypes';
 import { LogCategoriesEnum } from '../types/serviceLoggerTypes';
@@ -120,10 +120,6 @@ const announcer = async () => {
           .addFields(embedFields);
       }
     }
-    logMessage(
-      config.source.formula1.identifier,
-      `emitting ${todaysEvents.length + (dedicatedEmbed ? 1 : 0)} announcement item(s)`,
-    );
     return {
       events: todaysEvents,
       dedicatedEmbed,
