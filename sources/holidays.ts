@@ -5,7 +5,7 @@ import { config } from '../config';
 import { fullMonths } from '../services/constants.service';
 import { collections } from '../services/database.service';
 import { announce } from '../services/discord.service';
-import { logError, logMessage } from '../services/logger.service';
+import { logError } from '../services/logger.service';
 import { padNumberToNDigits, padNumberToTwoDigits } from '../services/util.service';
 import { EventControllerType, EventType } from '../types/globalTypes';
 import { ChannelClassEnum } from '../types/serviceDiscordTypes';
@@ -61,7 +61,6 @@ const mergeToDb = async (events: EventType[]) => {
         upsert: true,
       },
     })));
-    logMessage(config.source.formula1.identifier, 'merge complete');
     return result.isOk();
   } catch (error) {
     logError(LogCategoriesEnum.DB_MERGE_FAILURE, config.source.holiday.identifier, String(error));

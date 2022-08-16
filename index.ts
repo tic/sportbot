@@ -24,8 +24,14 @@ const modules = [
 
 modules.forEach((module) => {
   setIntervalAndStart(async () => {
+    await logMessage(module.config.identifier, 'collect invoked');
     const collectionResult = await module.controller.collect();
-    module.controller.mergeToDb(collectionResult);
+    if (collectionResult.length === 0) {
+      return;
+    }
+    await logMessage(module.config.identifier, 'merge to db invoked');
+    await module.controller.mergeToDb(collectionResult);
+    await logMessage(module.config.identifier, 'merge complete');
   }, module.config.intervalMs);
 });
 
@@ -56,7 +62,12 @@ const runAnnouncers = async () => {
   try {
     logMessage('index_runAnnouncers', 'Running announcers');
     const announcementObjects = await Promise.all(
-      modules.map((module) => module.controller.announcer()),
+      modules.map(async (module) => {
+        await logMessage(module.config.identifier, 'announcer invoked');
+        const announcementObj = await module.controller.announcer();
+        logMessage(module.config.identifier, 'announcer complete');
+        return announcementObj;
+      }),
     );
     const embedFields: EmbedFieldData[] = [];
     announcementObjects.forEach((announcement) => {
