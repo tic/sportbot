@@ -87,3 +87,11 @@ export const eventToEmbedDataValue = (event: EventType) => {
 
   return additionalFields.length === 0 ? baseString : `${baseString}\n${additionalFields.join('\n')}`;
 };
+
+export const dateObjectToMMDDYYYY = (date: Date) => `${
+  padNumberToTwoDigits(date.getMonth() + 1)
+}-${
+  padNumberToTwoDigits(date.getDate())
+}-${
+  date.getFullYear()
+}`;

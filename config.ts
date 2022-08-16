@@ -53,6 +53,9 @@ export const getConfig = () => {
         intervalMs: parseInt(env('SOURCE_NHL_INTERVALMS'), 10),
         identifier: 'source_nhl',
         url: env('SOURCE_NHL_URL'),
+        followedTeams: inDevelopment ? ['WSH'] : [
+          'WSH',
+        ],
       },
       ncaaBasketball: {
         intervalMs: parseInt(env('SOURCE_NCAA_BASKETBALL_INTERVALMS'), 10),

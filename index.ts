@@ -6,6 +6,7 @@ import { eventToEmbedDataValue, msUntilHourUTC, setIntervalAndStart } from './se
 import formula1 from './sources/formula1';
 import holiday from './sources/holidays';
 import nfl from './sources/nfl';
+import nhl from './sources/nhl';
 import { ChannelClassEnum } from './types/serviceDiscordTypes';
 import { LogCategoriesEnum } from './types/serviceLoggerTypes';
 
@@ -23,6 +24,10 @@ const modules = [
   {
     controller: nfl,
     config: config.source.nfl,
+  },
+  {
+    controller: nhl,
+    config: config.source.nhl,
   },
 ];
 
