@@ -4,7 +4,8 @@ import { announce, initialize } from './services/discord.service';
 import { logError, logMessage } from './services/logger.service';
 import { eventToEmbedDataValue, msUntilHourUTC, setIntervalAndStart } from './services/util.service';
 import formula1 from './sources/formula1';
-import holidays from './sources/holidays';
+import holiday from './sources/holidays';
+import nfl from './sources/nfl';
 import { ChannelClassEnum } from './types/serviceDiscordTypes';
 import { LogCategoriesEnum } from './types/serviceLoggerTypes';
 
@@ -16,8 +17,12 @@ const modules = [
     config: config.source.formula1,
   },
   {
-    controller: holidays,
+    controller: holiday,
     config: config.source.holiday,
+  },
+  {
+    controller: nfl,
+    config: config.source.nfl,
   },
 ];
 
