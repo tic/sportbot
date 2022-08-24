@@ -97,12 +97,22 @@ const announcer = async () => {
     // On Wednesday, we check if the upcoming weekend is a race weekend
     let dedicatedEmbed: MessageEmbed | undefined;
     if ((config.meta.inDevelopment && !config.meta.inPracticeMode) || new Date().getDay() === 3) {
-      const [headerItem, ...weekendItems] = (await collections.formula1.find({
-        startDate: {
-          $gt: now,
-          $lt: now + 518400000,
-        },
-      }).toArray() as unknown as EventType[]);
+      const [headerItem, ...weekendItems] = (
+        await collections.formula1.find({
+          startDate: {
+            $gt: now,
+            $lt: now + 518400000,
+          },
+        }).toArray() as unknown as EventType[]
+      ).sort((a, b) => {
+        if (a.endDate > a.startDate + 86400000) {
+          return -1;
+        }
+        if (b.endDate > b.startDate + 86400000) {
+          return 1;
+        }
+        return a.startDate - b.startDate;
+      });
       if (headerItem && weekendItems.length > 0) {
         const embedFields: EmbedFieldData[] = weekendItems.map((item) => ({
           name: `${item.title.split(' - ')[0]} (${fullDays[new Date(item.startDate).getDay()]})`,
