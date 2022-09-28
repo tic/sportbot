@@ -31,11 +31,8 @@ const collect = async () => {
           return null;
         }
 
-        let timeBits = dataBits[2].textContent.trim().match(/(\d?\d):(\d\d) ([AP]M)/);
-        if (timeBits === null) {
-          timeBits = ['', '12', '00', 'AM'];
-        }
-        if (timeBits.length !== 4) {
+        const timeBits = dataBits[2].textContent.trim().match(/(\d?\d):(\d\d) ([AP]M)/);
+        if (timeBits === null || timeBits.length !== 4) {
           return null;
         }
         baseDate.setMinutes(Number(timeBits[2]));
