@@ -26,6 +26,12 @@ export const getConfig = () => {
 
   const inDevelopment = parsedEnv?.MODE !== 'PRODUCTION';
 
+  // On Linux systems, the system timezone is usually set to UTC.
+  // We need to override that, since our time parsing logic relies
+  // on the Nodejs process operating in the same timezone in which
+  // it intends to post event times for.
+  process.env.TZ = env('TZ');
+
   const createdConfig = {
     source: {
       formula1: {
