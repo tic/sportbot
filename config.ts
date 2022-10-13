@@ -47,7 +47,7 @@ export const getConfig = () => {
           'DAL',
           'PHI',
           'NYG',
-          'WAS',
+          'WSH',
         ],
       },
       mlb: {
