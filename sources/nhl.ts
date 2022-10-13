@@ -16,10 +16,26 @@ const collect = async () => {
     const events: EventType[][] = await Promise.all(config.source.nhl.followedTeams.map(async (team) => {
       const { data: parsedResult } = await axios.get(generalUrl.replace('<$TEAM>', team.toLowerCase()));
       const dom = new JSDOM(parsedResult);
-      const teamEvents = Array.from(
-        dom.window.document.getElementsByClassName('Table__TR'),
-      ).filter(
-        (element) => element.getAttribute('data-idx') !== null && element.getAttribute('data-idx') !== '0',
+      const rows = Array.from(dom.window.document.getElementsByClassName('Table__TR'));
+      const { index, found } = rows.reduce((acc, cur, idx) => {
+        if (acc.found) {
+          return acc;
+        }
+
+        if (cur.innerHTML.indexOf('TV') > 0) {
+          acc.found = true;
+          acc.index = idx;
+        }
+
+        return acc;
+      }, { found: false, index: 0 });
+
+      if (!found) {
+        return [];
+      }
+
+      const teamEvents = rows.filter(
+        (element) => element.getAttribute('data-idx') !== null && Number(element.getAttribute('data-idx')) > index,
       ).map((element) => {
         const dataBits = Array.from(element.getElementsByTagName('td'));
         if (dataBits.length !== 5) {
@@ -35,11 +51,9 @@ const collect = async () => {
         if (Number.isNaN(baseDate.valueOf())) {
           return null;
         }
-        let timeBits = dataBits[2].textContent.trim().match(/(\d?\d):(\d\d) ([AP]M)/);
-        if (timeBits === null) {
-          timeBits = ['', '12', '00', 'AM'];
-        }
-        if (timeBits.length !== 4) {
+
+        const timeBits = dataBits[2].textContent.trim().match(/(\d?\d):(\d\d) ([AP]M)/);
+        if (timeBits === null || timeBits.length !== 4) {
           return null;
         }
         baseDate.setMinutes(Number(timeBits[2]));
