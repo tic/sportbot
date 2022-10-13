@@ -34,6 +34,7 @@ const collect = async () => {
         return [];
       }
 
+      const titles: Record<string, boolean> = {};
       const teamEvents = rows.filter(
         (element) => element.getAttribute('data-idx') !== null && Number(element.getAttribute('data-idx')) > index,
       ).map((element) => {
@@ -67,11 +68,19 @@ const collect = async () => {
         );
 
         const isAwayGame = dataBits[1].textContent.includes('@');
+        const baseName = isAwayGame
+          ? `${team.toUpperCase()} @ ${opponent.toUpperCase()} `
+          : `${opponent.toUpperCase()} @ ${team.toUpperCase()} `;
+
+        let name = baseName;
+        while (titles[name]) {
+          name += '*';
+        }
+
+        titles[name] = true;
 
         const event: EventType = {
-          title: isAwayGame
-            ? `${team.toUpperCase()} @ ${opponent.toUpperCase()}`
-            : `${opponent.toUpperCase()} @ ${team.toUpperCase()}`,
+          title: name,
           description: dataBits[3].textContent.length > 0 ? `Watch on ${dataBits[3].textContent}` : '',
           startDay: dateObjectToMMDDYYYY(baseDate),
           startDate: baseDate.getTime(),

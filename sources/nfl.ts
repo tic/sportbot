@@ -19,6 +19,8 @@ const collect = async () => {
       const dayStrings = Array.from(
         dom.window.document.getElementsByClassName('Table__Title'),
       ).map((element) => new Date(element.innerHTML));
+
+      const titles: Record<string, boolean> = {};
       const weekEvents = Array.from(
         dom.window.document.getElementsByClassName('Table__TR'),
       ).filter(
@@ -49,8 +51,16 @@ const collect = async () => {
         const team1 = (dataBits[0].innerHTML.match(/\/name\/([a-zA-Z]{2}[a-zA-Z]?)\//)?.[1] || '').toUpperCase();
         const team2 = (dataBits[1].innerHTML.match(/\/name\/([a-zA-Z]{2}[a-zA-Z]?)\//)?.[1] || '').toUpperCase();
 
+        const baseName = `${team1} @ ${team2} `;
+        let name = baseName;
+        while (titles[name]) {
+          name += '*';
+        }
+
+        titles[name] = true;
+
         return {
-          title: `${team1} @ ${team2}`,
+          title: name,
           description: `Watch on ${broadcaster}`,
           startDay: dateObjectToMMDDYYYY(baseDate),
           startDate: baseDate.getTime(),
