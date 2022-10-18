@@ -21,7 +21,7 @@ export const collections = {
   nfl: client.db(config.mongo.primaryDatabase).collection('nfl'),
   mlb: client.db(config.mongo.primaryDatabase).collection('mlb'),
   nhl: client.db(config.mongo.primaryDatabase).collection('nhl'),
-  ncaaBasketball: client.db(config.mongo.primaryDatabase).collection('ncaaBasketball'),
-  ncaaBaseball: client.db(config.mongo.primaryDatabase).collection('ncaaBaseball'),
+  ncaam: client.db(config.mongo.primaryDatabase).collection('ncaam'),
+  ncaab: client.db(config.mongo.primaryDatabase).collection('ncaab'),
   holiday: client.db(config.mongo.primaryDatabase).collection('holiday'),
 };

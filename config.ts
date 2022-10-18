@@ -52,25 +52,25 @@ export const getConfig = () => {
       },
       mlb: {
         intervalMs: parseInt(env('SOURCE_MLB_INTERVALMS'), 10),
-        identifier: 'spot_mlb',
+        identifier: 'source_mlb',
         url: env('SOURCE_MLB_URL'),
+        followedTeams: ['WSH', 'SEA'],
       },
       nhl: {
         intervalMs: parseInt(env('SOURCE_NHL_INTERVALMS'), 10),
         identifier: 'source_nhl',
         url: env('SOURCE_NHL_URL'),
-        followedTeams: inDevelopment ? ['WSH'] : [
-          'WSH',
-        ],
+        followedTeams: ['WSH'],
       },
-      ncaaBasketball: {
+      ncaam: {
         intervalMs: parseInt(env('SOURCE_NCAA_BASKETBALL_INTERVALMS'), 10),
-        identifier: 'source_ncaaBasketball',
+        identifier: 'source_ncaam',
         url: env('SOURCE_NCAA_BASKETBALL_URL'),
+        followedTeams: ['UVA'],
       },
-      ncaaBaseball: {
+      ncaab: {
         intervalMs: parseInt(env('SOURCE_NCAA_BASEBALL_INTERVALMS'), 10),
-        identifier: 'source_ncaaBaseball',
+        identifier: 'source_ncaab',
         url: env('SOURCE_NCAA_BASEBALL_URL'),
       },
       holiday: {
