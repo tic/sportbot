@@ -7,11 +7,11 @@ export type DatabaseItem = {
 };
 
 export type EventType = {
+  identifier: string,
   title: string,
   description: string,
   startDay: string,
   startDate: number,
-  identifier?: string,
   endDate?: number,
   imageUrl?: string,
   location?: string,

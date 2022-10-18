@@ -1,102 +1,36 @@
 import axios from 'axios';
-import { JSDOM } from 'jsdom';
 import { config } from '../config';
 import { collections } from '../services/database.service';
 import { logError } from '../services/logger.service';
 import { dateObjectToMMDDYYYY } from '../services/util.service';
+import { NhlResponse } from '../types/eventNhlTypes';
 import { EventControllerType, EventType } from '../types/globalTypes';
 import { LogCategoriesEnum } from '../types/serviceLoggerTypes';
 
-// TODO: switch source to https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard
-
 const collect = async () => {
   try {
-    // Offset the date by about +5 months since "2022" is a
-    // part of games ranging from September 2021 - June 2022
-    const offsetDate = new Date(new Date().getTime() + 12960000000);
-    const generalUrl = config.source.nhl.url.replace('<$YEAR>', offsetDate.getFullYear().toString());
-    const events: EventType[][] = await Promise.all(config.source.nhl.followedTeams.map(async (team) => {
-      const { data: parsedResult } = await axios.get(generalUrl.replace('<$TEAM>', team.toLowerCase()));
-      const dom = new JSDOM(parsedResult);
-      const rows = Array.from(dom.window.document.getElementsByClassName('Table__TR'));
-      const { index, found } = rows.reduce((acc, cur, idx) => {
-        if (acc.found) {
-          return acc;
-        }
-
-        if (cur.innerHTML.indexOf('TV') > 0) {
-          acc.found = true;
-          acc.index = idx;
-        }
-
-        return acc;
-      }, { found: false, index: 0 });
-
-      if (!found) {
-        return [];
-      }
-
-      const titles: Record<string, boolean> = {};
-      const teamEvents = rows.filter(
-        (element) => element.getAttribute('data-idx') !== null && Number(element.getAttribute('data-idx')) > index,
-      ).map((element) => {
-        const dataBits = Array.from(element.getElementsByTagName('td'));
-        if (dataBits.length !== 5) {
-          return null;
-        }
-
-        const opponent = dataBits[1].innerHTML.match(/.*\/name\/([a-zA-Z]{2}[a-zA-Z]?)\/.*/)[1];
-        if (!opponent) {
-          return null;
-        }
-
-        const baseDate = new Date(dataBits[0].textContent);
-        if (Number.isNaN(baseDate.valueOf())) {
-          return null;
-        }
-
-        const timeBits = dataBits[2].textContent.trim().match(/(\d?\d):(\d\d) ([AP]M)/);
-        if (timeBits === null || timeBits.length !== 4) {
-          return null;
-        }
-        baseDate.setMinutes(Number(timeBits[2]));
-        baseDate.setHours((Number(timeBits[1]) % 12) + (timeBits[3] === 'AM' ? 0 : 12));
-
-        const now = new Date();
-        const isSpringNow = +(now.getMonth() < 7);
-        const isTargetSpring = +(baseDate.getMonth() < 7);
-        baseDate.setFullYear(
-          now.getFullYear() + ((isSpringNow ^ isTargetSpring) * (isSpringNow ? -1 : 1)),
-        );
-
-        const isAwayGame = dataBits[1].textContent.includes('@');
-        const baseName = isAwayGame
-          ? `${team.toUpperCase()} @ ${opponent.toUpperCase()} `
-          : `${opponent.toUpperCase()} @ ${team.toUpperCase()} `;
-
-        let name = baseName;
-        while (titles[name]) {
-          name += '*';
-        }
-
-        titles[name] = true;
-
-        const event: EventType = {
-          title: name,
-          description: dataBits[3].textContent.length > 0 ? `Watch on ${dataBits[3].textContent}` : '',
-          startDay: dateObjectToMMDDYYYY(baseDate),
-          startDate: baseDate.getTime(),
-        };
-
-        if (!isAwayGame) {
-          event.location = 'Capital One Arena, Washington, D.C.';
-        }
-
-        return event;
-      }).filter((item) => item !== null) as EventType[];
-      return teamEvents;
-    }));
-    return events.flat(1);
+    const { data }: { data: NhlResponse } = await axios.get(config.source.nhl.url);
+    const now = Date.now();
+    return data.events.map((event) => {
+      const startDate = new Date(event.date).getTime();
+      return startDate <= now
+        ? null
+        : {
+          identifier: event.id,
+          title: event.shortName,
+          description: [
+            `Watch on ${Array.from(new Set(event.competitions[0].broadcasts.map((b) => b.names).flat(1))).join(', ')}`,
+            event.competitions[0]?.odds[0]?.details && event.competitions[0]?.odds[0]?.overUnder
+              ? `Odds: ${event.competitions[0].odds[0].details}  o/u ${event.competitions[0].odds[0].overUnder}`
+              : null,
+          ].filter((bit) => bit !== null).join('\n'),
+          startDay: dateObjectToMMDDYYYY(new Date(event.date)),
+          startDate,
+          location:
+            `${event.competitions[0].venue.fullName} -- `
+            + `${event.competitions[0].venue.address.city}, ${event.competitions[0].venue.address.state}`,
+        } as EventType;
+    }).filter((event) => event !== null);
   } catch (error) {
     logError(LogCategoriesEnum.SCRAPE_FAILURE, config.source.nhl.identifier, String(error));
     return [];
@@ -107,7 +41,7 @@ const mergeToDb = async (events: EventType[]) => {
   try {
     const result = await collections.nhl.bulkWrite(events.map((event) => ({
       updateOne: {
-        filter: { title: event.title },
+        filter: { identifier: event.identifier },
         update: { $set: { ...event } },
         upsert: true,
       },
@@ -124,14 +58,17 @@ const announcer = async () => {
     const startDay = dateObjectToMMDDYYYY(new Date());
     const events = (await collections.nhl.find({
       startDay,
-      $or: config.source.nhl.followedTeams.map((team) => ({ title: { $regex: team, $options: 'i' } })),
+      $or: config.source.nhl.followedTeams.map((team) => [
+        { title: { $regex: `^${team} @`, $options: 'i' } },
+        { title: { $regex: `@ ${team}$`, $options: 'i' } },
+      ]).flat(1),
     }).toArray()) as unknown as EventType[];
-    events.forEach((event) => {
-      // eslint-disable-next-line no-param-reassign
-      event.title = `(NHL) ${event.title}`;
-    });
+
     return {
-      events,
+      events: events.map((event) => ({
+        ...event,
+        title: `(NHL) ${event.title}`,
+      })),
     };
   } catch (error) {
     logError(LogCategoriesEnum.ANNOUNCE_FAILURE, config.source.nhl.identifier, String(error));
