@@ -131,7 +131,10 @@ const announcer = async () => {
       }
     }
     return {
-      events: todaysEvents,
+      events: todaysEvents.map((event) => ({
+        ...event,
+        title: `(F1) ${event.title}`,
+      })),
       dedicatedEmbed,
     };
   } catch (error) {
