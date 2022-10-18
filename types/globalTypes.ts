@@ -11,6 +11,7 @@ export type EventType = {
   description: string,
   startDay: string,
   startDate: number,
+  identifier?: string,
   endDate?: number,
   imageUrl?: string,
   location?: string,

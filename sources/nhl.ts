@@ -7,6 +7,8 @@ import { dateObjectToMMDDYYYY } from '../services/util.service';
 import { EventControllerType, EventType } from '../types/globalTypes';
 import { LogCategoriesEnum } from '../types/serviceLoggerTypes';
 
+// TODO: switch source to https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard
+
 const collect = async () => {
   try {
     // Offset the date by about +5 months since "2022" is a
