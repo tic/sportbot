@@ -86,3 +86,8 @@ export interface Event {
 export interface ApiResponse {
   events: Event[];
 }
+
+export interface FourFieldApiResponse extends ApiResponse {
+  season: Season;
+  day: { date: string };
+}

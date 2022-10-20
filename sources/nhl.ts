@@ -3,13 +3,13 @@ import { config } from '../config';
 import { collections } from '../services/database.service';
 import { logError } from '../services/logger.service';
 import { dateObjectToMMDDYYYY } from '../services/util.service';
-import { NhlResponse } from '../types/eventNhlTypes';
+import { FourFieldApiResponse } from '../types/espnApiTypes';
 import { EventControllerType, EventType } from '../types/globalTypes';
 import { LogCategoriesEnum } from '../types/serviceLoggerTypes';
 
 const collect = async () => {
   try {
-    const { data }: { data: NhlResponse } = await axios.get(config.source.nhl.url);
+    const { data }: { data: FourFieldApiResponse } = await axios.get(config.source.nhl.url);
     const now = Date.now();
     return data.events.map((event) => {
       const startDate = new Date(event.date).getTime();
