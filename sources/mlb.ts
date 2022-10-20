@@ -36,7 +36,6 @@ const collect = async () => {
         } as EventType;
     }).filter((event) => event !== null);
   } catch (error) {
-    console.error(error);
     logError(LogCategoriesEnum.SCRAPE_FAILURE, config.source.mlb.identifier, String(error));
     return [];
   }

@@ -95,3 +95,11 @@ export const dateObjectToMMDDYYYY = (date: Date) => `${
 }-${
   date.getFullYear()
 }`;
+
+export const dateObjectToYYYYMMDD = (date: Date) => `${
+  date.getFullYear()
+}-${
+  padNumberToTwoDigits(date.getMonth() + 1)
+}-${
+  padNumberToTwoDigits(date.getDate())
+}`;

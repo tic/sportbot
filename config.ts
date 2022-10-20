@@ -72,6 +72,43 @@ export const getConfig = () => {
         intervalMs: parseInt(env('SOURCE_NCAA_BASEBALL_INTERVALMS'), 10),
         identifier: 'source_ncaab',
         url: env('SOURCE_NCAA_BASEBALL_URL'),
+        followedTeams: ['UVA'],
+      },
+      ncaaf: {
+        intervalMs: parseInt(env('SOURCE_NCAA_FOOTBALL_INTERVALMS'), 10),
+        identifier: 'source_ncaaf',
+        url: env('SOURCE_NCAA_FOOTBALL_URL'),
+        followedTeams: ['UVA'],
+      },
+      ncaas: {
+        intervalMs: parseInt(env('SOURCE_NCAA_MENS_SOCCER_INTERVALMS'), 10),
+        identifier: 'source_ncaas',
+        url: env('SOURCE_NCAA_MENS_SOCCER_URL'),
+        followedTeams: ['UVA'],
+      },
+      ncaaws: {
+        intervalMs: parseInt(env('SOURCE_NCAA_WOMENS_SOCCER_INTERVALMS'), 10),
+        identifier: 'source_ncaaws',
+        url: env('SOURCE_NCAA_WOMENS_SOCCER_URL'),
+        followedTeams: ['UVA'],
+      },
+      mls: {
+        intervalMs: parseInt(env('SOURCE_MLS_INTERVALMS'), 10),
+        identifier: 'source_mls',
+        url: env('SOURCE_MLS_URL'),
+        followedTeams: ['DC-UNITED'],
+      },
+      fifawc: {
+        intervalMs: parseInt(env('SOURCE_FIFA_WORLD_CUP_INTERVALMS'), 10),
+        identifier: 'source_fifawc',
+        url: env('SOURCE_FIFA_WORLD_CUP_URL'),
+        followedTeams: ['USA'],
+      },
+      fifawwc: {
+        intervalMs: parseInt(env('SOURCE_FIFA_WOMENS_WORLD_CUP_INTERVALMS'), 10),
+        identifier: 'source_fifawwc',
+        url: env('SOURCE_FIFA_WOMENS_WORLD_CUP_URL'),
+        followedTeams: ['USA'],
       },
       holiday: {
         intervalMs: parseInt(env('SOURCE_HOLIDAY_INTERVALMS'), 10),

@@ -3,13 +3,13 @@ import { config } from '../config';
 import { collections } from '../services/database.service';
 import { logError } from '../services/logger.service';
 import { dateObjectToMMDDYYYY } from '../services/util.service';
-import { ApiResponse } from '../types/espnApiTypes';
+import { FourFieldApiResponse } from '../types/espnApiTypes';
 import { EventControllerType, EventType } from '../types/globalTypes';
 import { LogCategoriesEnum } from '../types/serviceLoggerTypes';
 
 const collect = async () => {
   try {
-    const { data }: { data: ApiResponse } = await axios.get(config.source.ncaam.url);
+    const { data }: { data: FourFieldApiResponse } = await axios.get(config.source.ncaaws.url);
     const now = Date.now();
     return data.events.map((event) => {
       const startDate = new Date(event.date).getTime();
@@ -30,20 +30,17 @@ const collect = async () => {
           ].filter((bit) => bit !== null).join('\n'),
           startDay: dateObjectToMMDDYYYY(new Date(event.date)),
           startDate,
-          location:
-            `${event.competitions[0].venue.fullName} -- `
-            + `${event.competitions[0].venue.address.city}, ${event.competitions[0].venue.address.state}`,
         } as EventType;
     }).filter((event) => event !== null);
   } catch (error) {
-    logError(LogCategoriesEnum.SCRAPE_FAILURE, config.source.ncaam.identifier, String(error));
+    logError(LogCategoriesEnum.SCRAPE_FAILURE, config.source.ncaaws.identifier, String(error));
     return [];
   }
 };
 
 const mergeToDb = async (events: EventType[]) => {
   try {
-    const result = await collections.ncaam.bulkWrite(events.map((event) => ({
+    const result = await collections.ncaaws.bulkWrite(events.map((event) => ({
       updateOne: {
         filter: { identifier: event.identifier },
         update: { $set: { ...event } },
@@ -52,7 +49,7 @@ const mergeToDb = async (events: EventType[]) => {
     })));
     return result.isOk();
   } catch (error) {
-    logError(LogCategoriesEnum.DB_MERGE_FAILURE, config.source.ncaam.identifier, String(error));
+    logError(LogCategoriesEnum.DB_MERGE_FAILURE, config.source.ncaaws.identifier, String(error));
     return false;
   }
 };
@@ -60,9 +57,9 @@ const mergeToDb = async (events: EventType[]) => {
 const announcer = async () => {
   try {
     const startDay = dateObjectToMMDDYYYY(new Date());
-    const events = (await collections.ncaam.find({
+    const events = (await collections.ncaaws.find({
       startDay,
-      $or: config.source.ncaam.followedTeams.map((team) => [
+      $or: config.source.ncaaws.followedTeams.map((team) => [
         { title: { $regex: `^${team} @`, $options: 'i' } },
         { title: { $regex: `@ ${team}$`, $options: 'i' } },
       ]).flat(1),
@@ -71,11 +68,11 @@ const announcer = async () => {
     return {
       events: events.map((event) => ({
         ...event,
-        title: `(NCAA Men's Basketball) ${event.title}`,
+        title: `(NCAA Women's Soccer) ${event.title}`,
       })),
     };
   } catch (error) {
-    logError(LogCategoriesEnum.ANNOUNCE_FAILURE, config.source.ncaam.identifier, String(error));
+    logError(LogCategoriesEnum.ANNOUNCE_FAILURE, config.source.ncaaws.identifier, String(error));
     return {
       events: [],
     };
