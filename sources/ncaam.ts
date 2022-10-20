@@ -72,7 +72,7 @@ const announcer = async () => {
     return {
       events: events.map((event) => ({
         ...event,
-        title: `(NCAAm) ${event.title}`,
+        title: `(NCAA Men's Basketball) ${event.title}`,
       })),
     };
   } catch (error) {
