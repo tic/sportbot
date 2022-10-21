@@ -35,3 +35,6 @@ export type EventControllerType = {
     dedicatedEmbed?: MessageEmbed,
   }>,
 };
+
+// This is for strings that look like 'new Date().toString()'
+export type JsDateString = string;

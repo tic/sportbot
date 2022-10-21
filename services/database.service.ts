@@ -29,5 +29,6 @@ export const collections = {
   ncaaws: client.db(config.mongo.primaryDatabase).collection('ncaaws'),
   fifawc: client.db(config.mongo.primaryDatabase).collection('fifawc'),
   fifawwc: client.db(config.mongo.primaryDatabase).collection('fifawwc'),
+  cricket: client.db(config.mongo.primaryDatabase).collection('cricket'),
   holiday: client.db(config.mongo.primaryDatabase).collection('holiday'),
 };

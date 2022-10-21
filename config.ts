@@ -5,6 +5,14 @@ import {
 import { prodDiscordServerConfig, devDiscordServerConfig } from './discord.config.json';
 import { DiscordServerType } from './types/serviceDiscordTypes';
 
+export type GenericSourceType = {
+  friendlyName: string;
+  intervalMs: number;
+  identifier: string;
+  url: string;
+  followedTeams?: string[];
+}
+
 export const getConfig = () => {
   console.log('[CNFIG] Loading project configuration...');
   const { parsed: parsedEnv }: DotenvConfigOutput = dotenvConfig();
@@ -35,82 +43,97 @@ export const getConfig = () => {
   const createdConfig = {
     source: {
       formula1: {
+        friendlyName: 'Formula 1',
         intervalMs: parseInt(env('SOURCE_FORMULA1_INTERVALMS'), 10),
         identifier: 'source_formula1',
         url: env('SOURCE_FORMULA1_URL'),
       },
       nfl: {
+        friendlyName: 'NFL',
         intervalMs: parseInt(env('SOURCE_NFL_INTERVALMS'), 10),
         identifier: 'source_nfl',
         url: env('SOURCE_NFL_URL'),
-        followedTeams: inDevelopment ? ['TEST'] : [
-          'DAL',
-          'PHI',
-          'NYG',
-          'WSH',
-        ],
+        followedTeams: ['DAL', 'PHI', 'NYG', 'WSH'],
       },
       mlb: {
+        friendlyName: 'MLB',
         intervalMs: parseInt(env('SOURCE_MLB_INTERVALMS'), 10),
         identifier: 'source_mlb',
         url: env('SOURCE_MLB_URL'),
         followedTeams: ['WSH', 'SEA'],
       },
       nhl: {
+        friendlyName: 'NHL',
         intervalMs: parseInt(env('SOURCE_NHL_INTERVALMS'), 10),
         identifier: 'source_nhl',
         url: env('SOURCE_NHL_URL'),
         followedTeams: ['WSH'],
       },
       ncaam: {
+        friendlyName: "NCAA Men's Basketball",
         intervalMs: parseInt(env('SOURCE_NCAA_BASKETBALL_INTERVALMS'), 10),
         identifier: 'source_ncaam',
         url: env('SOURCE_NCAA_BASKETBALL_URL'),
         followedTeams: ['UVA'],
       },
       ncaab: {
+        friendlyName: 'NCAA Baseball',
         intervalMs: parseInt(env('SOURCE_NCAA_BASEBALL_INTERVALMS'), 10),
         identifier: 'source_ncaab',
         url: env('SOURCE_NCAA_BASEBALL_URL'),
         followedTeams: ['UVA'],
       },
       ncaaf: {
+        friendlyName: 'NCAA Football',
         intervalMs: parseInt(env('SOURCE_NCAA_FOOTBALL_INTERVALMS'), 10),
         identifier: 'source_ncaaf',
         url: env('SOURCE_NCAA_FOOTBALL_URL'),
         followedTeams: ['UVA'],
       },
       ncaas: {
+        friendlyName: "NCAA Men's Soccer",
         intervalMs: parseInt(env('SOURCE_NCAA_MENS_SOCCER_INTERVALMS'), 10),
         identifier: 'source_ncaas',
         url: env('SOURCE_NCAA_MENS_SOCCER_URL'),
         followedTeams: ['UVA'],
       },
       ncaaws: {
+        friendlyName: "NCAA Women's Soccer",
         intervalMs: parseInt(env('SOURCE_NCAA_WOMENS_SOCCER_INTERVALMS'), 10),
         identifier: 'source_ncaaws',
         url: env('SOURCE_NCAA_WOMENS_SOCCER_URL'),
         followedTeams: ['UVA'],
       },
       mls: {
+        friendlyName: 'MLS',
         intervalMs: parseInt(env('SOURCE_MLS_INTERVALMS'), 10),
         identifier: 'source_mls',
         url: env('SOURCE_MLS_URL'),
         followedTeams: ['DC-UNITED'],
       },
       fifawc: {
+        friendlyName: 'FIFA World Cup',
         intervalMs: parseInt(env('SOURCE_FIFA_WORLD_CUP_INTERVALMS'), 10),
         identifier: 'source_fifawc',
         url: env('SOURCE_FIFA_WORLD_CUP_URL'),
         followedTeams: ['USA'],
       },
       fifawwc: {
+        friendlyName: "FIFA Women's World Cup",
         intervalMs: parseInt(env('SOURCE_FIFA_WOMENS_WORLD_CUP_INTERVALMS'), 10),
         identifier: 'source_fifawwc',
         url: env('SOURCE_FIFA_WOMENS_WORLD_CUP_URL'),
         followedTeams: ['USA'],
       },
+      cricket: {
+        friendlyName: 'International Cricket',
+        intervalMs: parseInt(env('SOURCE_CRICKET_INTERVALMS'), 10),
+        identifier: 'source_cricket',
+        url: env('SOURCE_CRICKET_URL'),
+        followedTeams: ['USA'],
+      },
       holiday: {
+        friendlyName: 'Unoffical Holidays',
         intervalMs: parseInt(env('SOURCE_HOLIDAY_INTERVALMS'), 10),
         identifier: 'source_holiday',
         url: env('SOURCE_HOLIDAY_URL'),
@@ -129,6 +152,7 @@ export const getConfig = () => {
           : prodDiscordServerConfig
         ) as unknown as DiscordServerType[],
       identifier: 'service_discord',
+      prefix: 'ev!',
     },
     mongo: {
       url: env('MONGO_URL'),
