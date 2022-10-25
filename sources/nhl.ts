@@ -20,7 +20,7 @@ const collect = async () => {
           title: event.shortName,
           description: [
             `Watch on ${Array.from(new Set(event.competitions[0].broadcasts.map((b) => b.names).flat(1))).join(', ')}`,
-            event.competitions[0]?.odds[0]?.details && event.competitions[0]?.odds[0]?.overUnder
+            event.competitions[0]?.odds?.[0]?.details && event.competitions[0]?.odds?.[0]?.overUnder
               ? `Odds: ${event.competitions[0].odds[0].details}  o/u ${event.competitions[0].odds[0].overUnder}`
               : null,
           ].filter((bit) => bit !== null).join('\n'),
@@ -32,6 +32,7 @@ const collect = async () => {
         } as EventType;
     }).filter((event) => event !== null);
   } catch (error) {
+    console.error(error);
     logError(LogCategoriesEnum.SCRAPE_FAILURE, config.source.nhl.identifier, String(error));
     return [];
   }
@@ -56,6 +57,13 @@ const mergeToDb = async (events: EventType[]) => {
 const announcer = async () => {
   try {
     const startDay = dateObjectToMMDDYYYY(new Date());
+    console.log(JSON.stringify({
+      startDay,
+      $or: config.source.nhl.followedTeams.map((team) => [
+        { title: { $regex: `^${team} @`, $options: 'i' } },
+        { title: { $regex: `@ ${team}$`, $options: 'i' } },
+      ]).flat(1),
+    }, undefined, '  '));
     const events = (await collections.nhl.find({
       startDay,
       $or: config.source.nhl.followedTeams.map((team) => [
