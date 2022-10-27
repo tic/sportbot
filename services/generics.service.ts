@@ -60,9 +60,11 @@ export const genericCollectionFunction = async ({
           description: propOverrides.description
             ? propOverrides.description(event)
             : [
-              `Watch on ${Array.from(
-                new Set(event.competitions[0].broadcasts.map((b) => b.names).flat(1)),
-              ).join(', ')}`,
+              event.competitions[0].broadcasts.length === 0
+                ? null
+                : `Watch on ${
+                  Array.from(new Set(event.competitions[0].broadcasts.map((b) => b.names).flat(1))).join(', ')
+                }`,
               event.competitions[0]?.odds?.[0]?.details && event.competitions[0]?.odds?.[0]?.overUnder
                 ? `Odds: ${event.competitions[0].odds[0].details}  o/u ${event.competitions[0].odds[0].overUnder}`
                 : null,

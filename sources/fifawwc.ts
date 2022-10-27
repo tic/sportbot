@@ -1,86 +1,35 @@
-import axios from 'axios';
 import { config } from '../config';
-import { collections } from '../services/database.service';
-import { logError } from '../services/logger.service';
-import { dateObjectToMMDDYYYY } from '../services/util.service';
-import { ApiResponse } from '../types/espnApiTypes';
+import {
+  dropUnrelatedTeams,
+  genericAnnounceFunction,
+  genericCollectionFunction,
+  genericMergeFunction,
+} from '../services/generics.service';
 import { EventControllerType, EventType } from '../types/globalTypes';
-import { LogCategoriesEnum } from '../types/serviceLoggerTypes';
 
-const collect = async () => {
-  try {
-    const { data }: { data: ApiResponse } = await axios.get(config.source.fifawwc.url);
-    const now = Date.now();
-    return data.events.map((event) => {
-      const startDate = new Date(event.date).getTime();
-      return startDate <= now
-        ? null
-        : {
-          identifier: event.id,
-          title: event.shortName,
-          description: [
-            event.competitions[0].broadcasts.length === 0
-              ? null
-              : `Watch on ${
-                Array.from(new Set(event.competitions[0].broadcasts.map((b) => b.names).flat(1))).join(', ')
-              }`,
-            event.competitions[0]?.odds?.[0]?.details && event.competitions[0]?.odds?.[0]?.overUnder
-              ? `Odds: ${event.competitions[0].odds[0].details}  o/u ${event.competitions[0].odds[0].overUnder}`
-              : null,
-          ].filter((bit) => bit !== null).join('\n'),
-          startDay: dateObjectToMMDDYYYY(new Date(event.date)),
-          startDate,
-          location:
-            `${event.competitions[0].venue.fullName} -- `
-            + `${event.competitions[0].venue.address.city}`,
-        } as EventType;
-    }).filter((event) => event !== null);
-  } catch (error) {
-    logError(LogCategoriesEnum.SCRAPE_FAILURE, config.source.fifawwc.identifier, String(error));
-    return [];
-  }
-};
+const collect = () => genericCollectionFunction({
+  logIdentifier: config.source.fifawwc.identifier,
+  url: config.source.fifawwc.url,
+  dropFunction: dropUnrelatedTeams(config.source.fifawwc.followedTeams),
+  propOverrides: {
+    location: (event) => `${event.competitions[0].venue.fullName} -- `
+      + `${event.competitions[0].venue.address.city}`,
+  },
+});
 
-const mergeToDb = async (events: EventType[]) => {
-  try {
-    const result = await collections.fifawwc.bulkWrite(events.map((event) => ({
-      updateOne: {
-        filter: { identifier: event.identifier },
-        update: { $set: { ...event } },
-        upsert: true,
-      },
-    })));
-    return result.isOk();
-  } catch (error) {
-    logError(LogCategoriesEnum.DB_MERGE_FAILURE, config.source.fifawwc.identifier, String(error));
-    return false;
-  }
-};
+const mergeToDb = (events: EventType[]) => genericMergeFunction({
+  logIdentifier: config.source.fifawwc.identifier,
+  collection: 'fifawwc',
+  events,
+  titlePrefix: "FIFA Women's World Cup",
+});
 
-const announcer = async () => {
-  try {
-    const startDay = dateObjectToMMDDYYYY(new Date());
-    const events = (await collections.fifawwc.find({
-      startDay,
-      $or: config.source.fifawwc.followedTeams.map((team) => [
-        { title: { $regex: `^${team} @`, $options: 'i' } },
-        { title: { $regex: `@ ${team}$`, $options: 'i' } },
-      ]).flat(1),
-    }).toArray()) as unknown as EventType[];
-
-    return {
-      events: events.map((event) => ({
-        ...event,
-        title: `(FIFA Women's World Cup) ${event.title}`,
-      })),
-    };
-  } catch (error) {
-    logError(LogCategoriesEnum.ANNOUNCE_FAILURE, config.source.fifawwc.identifier, String(error));
-    return {
-      events: [],
-    };
-  }
-};
+const announcer = () => genericAnnounceFunction({
+  logIdentifier: config.source.fifawwc.identifier,
+  collection: 'fifawwc',
+  teams: config.source.fifawwc.followedTeams,
+  titlePrefix: "FIFA Women's World Cup",
+});
 
 export default {
   collect,
