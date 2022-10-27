@@ -103,3 +103,13 @@ export const dateObjectToYYYYMMDD = (date: Date) => `${
 }-${
   padNumberToTwoDigits(date.getDate())
 }`;
+
+export const didEventUpdate = (event1: EventType, event2: EventType) : boolean => event1.allDay !== event2.allDay
+  || event1.description !== event2.description
+  || event1.endDate !== event2.endDate
+  || event1.imageUrl !== event2.imageUrl
+  || event1.location !== event2.location
+  || event1.startDate !== event2.startDate
+  || event1.startDay !== event2.startDay
+  || event1.title !== event2.title
+  || event1.url !== event2.url;

@@ -1,80 +1,82 @@
 import { EmbedFieldData, MessageEmbed } from 'discord.js';
 import { config } from './config';
+import { collections } from './services/database.service';
 import { announce, initialize } from './services/discord.service';
 import { logError, logMessage } from './services/logger.service';
 import { eventToEmbedDataValue, msUntilHourUTC, setIntervalAndStart } from './services/util.service';
-import cricket from './sources/cricket';
-import fifawc from './sources/fifawc';
-import fifawwc from './sources/fifawwc';
-import formula1 from './sources/formula1';
-import holiday from './sources/holidays';
-import mlb from './sources/mlb';
-import mls from './sources/mls';
-import ncaab from './sources/ncaab';
-import ncaaf from './sources/ncaaf';
-import ncaam from './sources/ncaam';
-import ncaas from './sources/ncaas';
-import ncaaws from './sources/ncaaws';
-import nfl from './sources/nfl';
+// import cricket from './sources/cricket';
+// import fifawc from './sources/fifawc';
+// import fifawwc from './sources/fifawwc';
+// import formula1 from './sources/formula1';
+// import holiday from './sources/holidays';
+// import mlb from './sources/mlb';
+// import mls from './sources/mls';
+// import ncaab from './sources/ncaab';
+// import ncaaf from './sources/ncaaf';
+// import ncaam from './sources/ncaam';
+// import ncaas from './sources/ncaas';
+// import ncaaws from './sources/ncaaws';
+// import nfl from './sources/nfl';
 import nhl from './sources/nhl';
+import { EventType } from './types/globalTypes';
 import { ChannelClassEnum } from './types/serviceDiscordTypes';
 import { LogCategoriesEnum } from './types/serviceLoggerTypes';
 
 initialize();
 
 const modules = [
-  {
-    controller: cricket,
-    config: config.source.cricket,
-  },
-  {
-    controller: fifawc,
-    config: config.source.fifawc,
-  },
-  {
-    controller: fifawwc,
-    config: config.source.fifawwc,
-  },
-  {
-    controller: formula1,
-    config: config.source.formula1,
-  },
-  {
-    controller: holiday,
-    config: config.source.holiday,
-  },
-  {
-    controller: mlb,
-    config: config.source.mlb,
-  },
-  {
-    controller: mls,
-    config: config.source.mls,
-  },
-  {
-    controller: ncaab,
-    config: config.source.ncaab,
-  },
-  {
-    controller: ncaaf,
-    config: config.source.ncaaf,
-  },
-  {
-    controller: ncaam,
-    config: config.source.ncaam,
-  },
-  {
-    controller: ncaas,
-    config: config.source.ncaas,
-  },
-  {
-    controller: ncaaws,
-    config: config.source.ncaaws,
-  },
-  {
-    controller: nfl,
-    config: config.source.nfl,
-  },
+  // {
+  //   controller: cricket,
+  //   config: config.source.cricket,
+  // },
+  // {
+  //   controller: fifawc,
+  //   config: config.source.fifawc,
+  // },
+  // {
+  //   controller: fifawwc,
+  //   config: config.source.fifawwc,
+  // },
+  // {
+  //   controller: formula1,
+  //   config: config.source.formula1,
+  // },
+  // {
+  //   controller: holiday,
+  //   config: config.source.holiday,
+  // },
+  // {
+  //   controller: mlb,
+  //   config: config.source.mlb,
+  // },
+  // {
+  //   controller: mls,
+  //   config: config.source.mls,
+  // },
+  // {
+  //   controller: ncaab,
+  //   config: config.source.ncaab,
+  // },
+  // {
+  //   controller: ncaaf,
+  //   config: config.source.ncaaf,
+  // },
+  // {
+  //   controller: ncaam,
+  //   config: config.source.ncaam,
+  // },
+  // {
+  //   controller: ncaas,
+  //   config: config.source.ncaas,
+  // },
+  // {
+  //   controller: ncaaws,
+  //   config: config.source.ncaaws,
+  // },
+  // {
+  //   controller: nfl,
+  //   config: config.source.nfl,
+  // },
   {
     controller: nhl,
     config: config.source.nhl,
@@ -135,11 +137,43 @@ const runAnnouncers = async () => {
   }
 };
 
+const doSpecialAnnouncements = async () => {
+  try {
+    logMessage('index_doSpecialAnnouncements', 'doing special announcements');
+    const events = (await collections.specialAnnouncements.find().toArray()) as unknown as EventType[];
+    const embedFields: EmbedFieldData[] = [];
+    events.forEach((event) => {
+      embedFields.push({
+        name: event.title,
+        value: eventToEmbedDataValue(event),
+      });
+    });
+
+    await collections.specialAnnouncements.deleteMany({});
+
+    if (embedFields.length > 0) {
+      const collectiveEmbed = new MessageEmbed()
+        .setColor('#0000ff')
+        .setTitle(`Event Update Report for <t:${Math.floor(new Date().getTime() / 1000)}:D>`)
+        .setDescription("Changes to today's events:")
+        .addFields(embedFields);
+      announce(ChannelClassEnum.GENERAL_UPDATES, undefined, collectiveEmbed, []);
+    }
+  } catch (error) {
+    logError(LogCategoriesEnum.ANNOUNCE_FAILURE, 'index_doSpecialAnnouncements', String(error));
+  }
+};
+
 if (config.meta.inDevelopment) {
-  setTimeout(runAnnouncers, 3000);
+  setTimeout(runAnnouncers, 9000);
+  setTimeout(doSpecialAnnouncements, 8000);
 }
 
 setTimeout(() => {
   runAnnouncers();
   setInterval(runAnnouncers, 86400000);
+
+  setTimeout(() => {
+    setInterval(doSpecialAnnouncements, 3600000);
+  }, 1800000);
 }, msUntilHourUTC(10));

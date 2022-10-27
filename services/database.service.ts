@@ -17,6 +17,8 @@ export const client = new MongoClient(
 );
 
 export const collections = {
+  announced: client.db(config.mongo.primaryDatabase).collection('announced'),
+  specialAnnouncements: client.db(config.mongo.primaryDatabase).collection('specialAnnouncements'),
   formula1: client.db(config.mongo.primaryDatabase).collection('formula1'),
   nfl: client.db(config.mongo.primaryDatabase).collection('nfl'),
   mlb: client.db(config.mongo.primaryDatabase).collection('mlb'),
