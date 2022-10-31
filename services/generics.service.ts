@@ -137,7 +137,11 @@ export const genericMergeFunction = async ({
           { returnDocument: 'before', upsert: true },
         );
 
-        const originalEvent: Partial<EventType> = result.value as unknown as Partial<EventType> || {};
+        if (result === null) {
+          return true;
+        }
+
+        const originalEvent: Partial<EventType> = result.value as unknown as Partial<EventType>;
 
         const mutableProperties = [
           'title',
