@@ -11,6 +11,18 @@ interface GenericFunctionProperties {
   logIdentifier: string;
 }
 
+const mutableEventProperties = [
+  'title',
+  'description',
+  'startDay',
+  'startDate',
+  'endDate',
+  'imageUrl',
+  'location',
+  'url',
+  'allDay',
+];
+
 export interface ICollectProperties extends GenericFunctionProperties {
   url: string;
   requireFuture?: boolean;
@@ -137,33 +149,20 @@ export const genericMergeFunction = async ({
           { returnDocument: 'before', upsert: true },
         );
 
-        if (result === null) {
+        const todaysAnnouncement = await collections.announced.findOne({ startDay: dateObjectToMMDDYYYY(new Date()) });
+
+        // If today's events haven't been announced, return.
+        if (!todaysAnnouncement) {
           return true;
         }
 
-        const originalEvent: Partial<EventType> = result.value as unknown as Partial<EventType>;
-
-        const mutableProperties = [
-          'title',
-          'description',
-          'startDay',
-          'startDate',
-          'endDate',
-          'imageUrl',
-          'location',
-          'url',
-          'allDay',
-        ];
-
-        const eventModified = mutableProperties.reduce(
+        const originalEvent: Partial<EventType> = result.value as unknown as (Partial<EventType> | null) || {};
+        const eventModified = mutableEventProperties.reduce(
           (changed, prop) => changed || (event[prop] !== originalEvent[prop]),
           false,
         );
 
-        if (
-          (!originalEvent.identifier || eventModified)
-          && !(await collections.announced.findOne({ startDay: dateObjectToMMDDYYYY(new Date()) }))
-        ) {
+        if (eventModified && todaysAnnouncement) {
           // Announcer has already run for the day. Push these events into the special announcement collection.
           logMessage(logIdentifier, 'adding special announcement item');
           await collections.specialAnnouncements.insertOne({ ...event, title: `(${titlePrefix}) ${event.title}` });
