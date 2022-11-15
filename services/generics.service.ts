@@ -149,10 +149,12 @@ export const genericMergeFunction = async ({
           { returnDocument: 'before', upsert: true },
         );
 
-        const todaysAnnouncement = await collections.announced.findOne({ startDay: dateObjectToMMDDYYYY(new Date()) });
+        const currentStartDay = dateObjectToMMDDYYYY(new Date());
+        const todaysAnnouncement = await collections.announced.findOne({ startDay: currentStartDay });
+        const eventIsToday = event.startDay === currentStartDay;
 
         // If today's events haven't been announced, return.
-        if (!todaysAnnouncement) {
+        if (!todaysAnnouncement || !eventIsToday) {
           return true;
         }
 

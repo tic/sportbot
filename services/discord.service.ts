@@ -39,9 +39,12 @@ const throttleMessages = async () => {
       logMessage(config.discord.identifier, 'draining message queue');
       // eslint-disable-next-line no-await-in-loop
       const release = await queueLock.acquire();
-      const messagePayload = messageQueue.shift() as MessagePayload;
-      (messagePayload.target as TextChannel).send(messagePayload);
-      release();
+      try {
+        const messagePayload = messageQueue.shift() as MessagePayload;
+        (messagePayload.target as TextChannel).send(messagePayload);
+      } finally {
+        release();
+      }
       // eslint-disable-next-line no-await-in-loop
       await sleep(3000);
     }
