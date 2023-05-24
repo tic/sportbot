@@ -158,16 +158,18 @@ export const genericMergeFunction = async ({
           return true;
         }
 
-        const originalEvent: Partial<EventType> = result.value as unknown as (Partial<EventType> | null) || {};
-        const eventModified = mutableEventProperties.reduce(
-          (changed, prop) => changed || (event[prop] !== originalEvent[prop]),
-          false,
-        );
+        const originalEvent: Partial<EventType> = result.value as unknown as (Partial<EventType> | null);
+        if (originalEvent !== null) {
+          const eventModified = mutableEventProperties.reduce(
+            (changed, prop) => changed || (event[prop] !== originalEvent[prop]),
+            false,
+          );
 
-        if (eventModified && todaysAnnouncement) {
-          // Announcer has already run for the day. Push these events into the special announcement collection.
-          logMessage(logIdentifier, 'adding special announcement item');
-          await collections.specialAnnouncements.insertOne({ ...event, title: `(${titlePrefix}) ${event.title}` });
+          if (eventModified && todaysAnnouncement) {
+            // Announcer has already run for the day. Push these events into the special announcement collection.
+            logMessage(logIdentifier, 'adding special announcement item');
+            await collections.specialAnnouncements.insertOne({ ...event, title: `(${titlePrefix}) ${event.title}` });
+          }
         }
 
         return true;
